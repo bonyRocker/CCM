@@ -1,0 +1,254 @@
+﻿@model CardChequeModule.Models.CARDCHEREUISITION
+
+@{
+    ViewBag.Title = "Create";
+}
+
+
+
+<div id="result"></div>
+
+@*@using (Html.BeginForm(null, null, FormMethod.Post, new { @class = "form-horizontal", id = "chequeReqForm" }))*@
+@using (Ajax.BeginForm("Details", "Requisition",
+    new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { area = "Admin", id = "chequeReqForm", @class = "form-horizontal" }))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true)
+    @Html.TextBoxFor(model => model.ID, new { @class = "form-control col-sm-10", @type = "hidden" })
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-envelope"> Requisition Form</span></h3>
+        </div>
+        
+        @Html.HiddenFor(x=>x.CREATEDBY)
+        @Html.HiddenFor(x=>x.LEAFNO)
+        @Html.HiddenFor(x=>x.LEAFFROM)
+        @Html.HiddenFor(x => x.LEAFTO)
+        @Html.HiddenFor(x => x.LEAFNEXT)
+        @Html.HiddenFor(x=>x.AUTHORIZEDBY)
+        @Html.HiddenFor(x => x.AUTHORIZEDON)
+        @Html.HiddenFor(x => x.ESTABLISHMENTBY)
+        @Html.HiddenFor(x => x.ESTABLISHMENTON)
+        @Html.HiddenFor(x => x.CALLCENTERBY)
+        @Html.HiddenFor(x => x.CALLCENTERON)
+        @Html.HiddenFor(x => x.ISDELETE)
+        @Html.HiddenFor(x => x.MODIFIEDBY)
+        @Html.HiddenFor(x => x.MODIFIEDON)
+        @Html.HiddenFor(x => x.DELIVEREDBY)
+        @Html.HiddenFor(x => x.DELIVEREDON)
+
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-sm-6">
+                    @Html.LabelFor(model => model.CARDNO)
+                    @Html.TextBoxFor(model => model.CARDNO, new { @class = "form-control", @placeholder = "Card Number" })
+                    <label style="display: none">Email</label>
+
+                </div>
+
+
+                @Html.LabelFor(model => model.CREATEDON, "Date", new { @class = "col-sm-1" })
+                <div class="col-sm-6">
+                    <div class='input-group date' id='datetimepicker1'>
+
+                        @Html.TextBoxFor(x => x.CREATEDON, new { @class = "form-control", @placeholder = "Date" })
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div id="result"></div>
+            <img id="spinner" src="~/assets/img/spinner.gif" style="display: none;">
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.BRANCHCODE, "Branch", new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    @Html.DropDownList("BRANCHCODE", null, null, new { @class = "form-control" })
+                    @*@Html.HiddenFor(x => x.BRANCHCODE)*@
+                </div>
+                @Html.LabelFor(model => model.STATUS, new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    @Html.DropDownList("STATUS", null, "Select Status", new { @class = "form-control", @placeholder = "Status", @disabled=true})
+                    @Html.HiddenFor(x => x.STATUS)
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.REFERENCENO, new { @class = "col-sm-1 control-label" })
+
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.REFERENCENO, new { @class = "form-control" })
+                </div>
+                @Html.LabelFor(model => model.ISACTIVE, new { @class = "col-sm-1 control-label" })
+
+                <div class="col-sm-5">
+                    @Html.CheckBoxFor(model => model.ISACTIVE, new {onclick = "return false" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                
+                <div class="col-sm-12">
+                    @Html.LabelFor(model => model.REMARKS)
+                    @Html.TextAreaFor(model => model.REMARKS, new { @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-10 control-label"></label>
+                <div class="col-sm-2">
+                    
+                    <button class="btn btn-danger" type="submit" name="btnName" value="delete">Delete</button>
+                    <button class="btn btn-success" name="btnName" value="update" type="submit">Update</button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+}
+
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody1">
+
+            </div>
+            <div class="modal-footer">
+                @Html.ActionLink("Ok", "Index", "Requisition", new { area = "Admin" }, new { @class = "btn btn-primary" })
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Valid Card</h4>
+            </div>
+            <div class="modal-body" id="myModalBody">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+@section scripts{
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+    $('#saveButton').prop('disabled', true);
+    $("#CARDNO").blur(function() {
+       
+
+                $.ajax({
+                url: '@Url.Action("GetCardDetails", "Home", new { area = "ChequeRequisition" })',
+                type: 'POST',
+                data: { cardNo: $(this).val() },
+                beforeSend: function () { $('#spinner').show(); },
+                complete: function () { $('#spinner').hide(); },
+                success: function (result) {
+                    if (result.flag == 1) {
+
+                        $('#saveButton').prop('disabled', false);
+                        var msg = result.userName + "<br/>" + result.userDob;
+                        $('#myModalBody').html(msg);
+                        $('#myModal').modal('show');
+
+                    }
+                    else if (result.flag == 0) {
+                        $('#saveButton').prop('disabled', true);
+                        $('#myModalBody').html('<strong>' + result.msg + '</strong>');
+                        $('#myModal').modal('show');
+                    }
+                    else if (result.flag == 2) {
+                        $('#saveButton').prop('disabled', true);
+                        $('#myModalBody').html('<strong>' + result.msg + '</strong>');
+                        $('#myModal').modal('show');
+                    }
+                    else {
+                        $('#saveButton').prop('disabled', true);
+                        $('#myModalBody').html('<strong>Error</strong>');
+                        $('#myModal').modal('show');
+                    }
+
+                },
+                error: function (xhr) {
+                    $('#saveButton').prop('disabled', true);
+                    alert(xhr.message);
+                }
+            });
+    });
+
+    $("#chequeReqForm").validate({
+        rules: {
+
+            CREATEDON: {
+                required: true,
+
+            },
+            CARDNO: {
+                required: true,
+                digits: true,
+                maxlength: 18,
+
+            },
+        },
+    });
+
+    function OnSuccess(response) {
+
+        $('#myModalBody1').html(response);
+        $('#myModal1').modal('show');
+    }
+    function OnFailure(response) {
+
+        $('#myModalBody1').html(response);
+        $('#myModal1').modal('show');
+    }
+    </script>
+}
+
+@section DatetimeCss{
+
+    <link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+}
+@section DateTimeJs{
+
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('#datetimepicker1').datetimepicker({
+                format: 'MM/DD/YYYY'
+            });
+            //$('#datetimepicker2').datetimepicker({
+            //    format: 'MM/DD/YYYY'
+            //});
+        });
+
+
+    </script>
+}
+

@@ -1,0 +1,334 @@
+﻿@model CardChequeModule.Models.CARDCHTRAN
+
+@{
+    ViewBag.Title = "Create";
+}
+
+
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="col-lg-3 col-sm-3">
+            <img src="~/assets/img/obl.jpg" class="" alt="Responsive image">
+
+        </div>
+        <div class="col-lg-6 text-center col-sm-3">
+            <h3>CARD CHEQUE PAYMENT</h3>
+        </div>
+        <div class="col-lg-3 col-sm-3" align="right">
+            <img src="~/assets/img/visa.jpg" class="" alt="Responsive image">
+        </div>
+    </div>
+</div>
+
+
+
+@using (Ajax.BeginForm("Details", "CardCheque",
+    new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { area = "Admin", id = "cardchequeForm", @class = "form-horizontal" }))
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-file"> Cheque Payment</span></h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="name" class="col-lg-2 control-label">Leaf Number</label>
+                <div class="col-lg-4">
+                    @Html.TextBoxFor(x => Model.CARDCHLEAF.LEAFNO, new { @class = "form-control" })
+                    @Html.HiddenFor(x=>x.ID)
+                    @Html.HiddenFor(x=>x.CHEQUELEAFID)
+                </div>
+                <label for="name" class="col-lg-2 control-label">Card Number</label>
+                <div class="col-lg-4">
+                    @Html.TextBoxFor(x => x.CARDNO, new { @class = "form-control", @readonly = true })
+                </div>
+
+            </div>
+
+
+            @*@Html.HiddenFor(x => x.CHEQUELEAFID)*@
+            <img id="spinner" src="~/assets/img/spinner.gif" style="display: none;">
+
+
+            <div class="form-group">
+                <label for="name" class="col-lg-2 control-label">Pay To</label>
+                <div class="col-lg-10">
+                    @Html.TextBoxFor(x => x.BENEFICIARINFO, new { @class = "form-control" })
+                </div>
+
+
+            </div>
+
+            <div class="form-group" id="amountDiv">
+                <label for="amount" class="col-xs-2 col-sm-2 control-label">Amount</label>
+                <div class="col-lg-4">
+                    @Html.TextBoxFor(x => x.AMOUNT, new { @class = "form-control", @placeholder = "Amount" })
+                </div>
+
+
+                <label for="currency" class="col-xs-2 col-sm-2 control-label">Currency</label>
+                <div class="col-lg-4">
+                    @Html.DropDownList("CURRENCY", null, null, new { @class = "form-control" })
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label for="birthday" class="col-lg-2 control-label">Card Holder Name</label>
+                <div class="col-lg-4">
+                    @Html.TextBoxFor(x => x.CARDHOLDERNAME, new { @class = "form-control", @placeholder = "Name", @readonly = true })
+
+                </div>
+                <label for="name" class="col-lg-2 control-label">Signature Verified</label>
+                <div class="col-lg-4" id="checkerror">
+                    @Html.CheckBoxFor(x => x.ISSIGNATUREVERIFIED)
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label for="name" class="col-lg-2 control-label">Branch</label>
+                <div class="col-lg-4">
+                    @Html.DropDownList("BRANCHCODE", null, "Select Branch", new { @class = "form-control" })
+                </div>
+                <label for="name" class="col-lg-2 control-label">Date</label>
+                <div class="col-lg-4">
+                    <div class='input-group date' id='datetimepicker1'>
+                        @Html.TextBoxFor(x => x.REQUESTDATE, new { @class = "form-control", @placeholder = "MM-DD-YYYY" })
+
+                        <span class="input-group-addon" id="mySpan">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-md-offset-10 col-md-12">
+                    <button class="btn btn-danger" type="submit" name="btnName" value="delete">Delete</button>
+                    <button class="btn btn-success" type="submit" name="btnName" value="update">Update</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-lg-4 col-lg-offset-1 text-center">
+                        <img id="userPhoto" alt="" style="width: 50%; height: 120px; border:1px solid black" src="~/assets/img/default.png" />
+
+                        <hr />
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-2 text-center">
+                        <img id="sigphoto" style="width: 100%; height: 120px; border: 1px solid black" src="~/assets/img/signaturei.jpeg" />
+                        <hr />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group">
+                    <div class="col-lg-4 col-lg-offset-1 text-center">
+                        <label for="birthday" class="control-label">Image</label>
+                    </div>
+                    <div class="col-lg-4 col-lg-offset-2 text-center">
+                        <label for="birthday" class=" control-label">Signature</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody">
+
+            </div>
+            @*<div class="modal-footer">
+                    @Html.ActionLink("Ok", "UserList", "Home", new { area = "Admin" }, new { @class = "btn btn-primary" })
+
+                </div>*@
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody1">
+
+            </div>
+            <div class="modal-footer">
+                @Html.ActionLink("Ok", "Index", "CardCheque", new { area = "Admin" }, new { @class = "btn btn-primary" })
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+
+        $("#cardchequeForm").validate({
+            rules: {
+
+                CARDCHLEAF_LEAFNO: {
+                    required: true,
+
+                },
+                CARDNO: {
+                    required: true,
+                    digits: true,
+                    maxlength: 18,
+
+                },
+                BENEFICIARINFO: {
+                    required: true,
+
+                },
+                AMOUNT: {
+                    required: true,
+
+                },
+                //CURRENCY: {
+                //    required: true,
+
+                //},
+                ISSIGNATUREVERIFIED: {
+                    required: true,
+
+                },
+                BRANCHCODE: {
+                    required: true,
+
+                },
+                REQUESTDATE: {
+                    required: true,
+
+                },
+
+
+            },
+
+            errorPlacement: function (error, element) {
+                if (element.attr("type") == "checkbox") {
+                    error.insertAfter("#checkerror").css({ marginLeft: "15px" });
+
+                } else {
+                    error.insertAfter(element);
+                }
+
+            },
+
+        });
+
+       // $('#saveButton').prop('disabled', true);
+        //$('#leafNo').blur(function () {
+
+        $.ajax({
+            url: '@Url.Action("GetInfo","CardCheque",new {area="Admin"})',
+            type: 'POST',
+            data: { leafno: $('#CARDCHLEAF_LEAFNO').val() },
+            beforeSend: function () { $('#spinner').show(); },
+            complete: function () { $('#spinner').hide(); },
+            success: function (result) {
+                //if (result == null) {
+
+                //    $('#myModalBody').html("No Data Found");
+                //    $('#myModal').modal('show');
+
+                //    $('#CARDNO').val('');
+                //    $('#CARDHOLDERNAME').val('');
+                //    $('#saveButton').prop('disabled', true);
+                //    //$('#userPhoto').removeAttr('src');
+                //    //$('#sigphoto').removeAttr('src');
+
+                //}
+                //if (result == 'used') {
+                //    // alert('Leaf Is Already Used');
+                //    $('#myModalBody').html("Leaf Is Already Used");
+                //    $('#myModal').modal('show');
+                //    $('#saveButton').prop('disabled', true);
+                //    //$('#userPhoto').removeAttr('src');
+                //    //$('#sigphoto').removeAttr('src');
+                //}
+                //else if (result == 'invalid') {
+                //    //('Invalid Leaf Number');
+                //    $('#myModalBody').html("Invalid Leaf Number");
+                //    $('#myModal').modal('show');
+                //    $('#saveButton').prop('disabled', true);
+                //    //$('#userPhoto').removeAttr('src');
+                //    //$('#sigphoto').removeAttr('src');
+                //}
+                //else {
+
+                $("#userPhoto").attr("src", "data:image/jpg;base64," + result.userPhoto);
+                $("#sigphoto").attr("src", "data:image/jpg;base64," + result.signature);
+                $('#CARDNO').val(result.cardno);
+                $('#CARDHOLDERNAME').val(result.name);
+                $('#CHEQUELEAFID').val(result.leafID);
+                $('#saveButton').prop('disabled', false);
+                // }
+
+
+            },
+            error: function (xhr) {
+                alert("Something is wrong");
+            }
+        });
+        // });
+
+        function OnSuccess(response) {
+
+            $('#myModalBody1').html(response);
+            $('#myModal1').modal('show');
+
+
+        }
+        function OnFailure(response) {
+            $('#myModalBody').html(response);
+            $('#myModal').modal('show');
+        }
+    </script>
+}
+
+@section DatetimeCss{
+
+    <link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+}
+@section DateTimeJs{
+
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('#datetimepicker1').datetimepicker({
+                format: 'MM/DD/YYYY'
+            });
+
+        });
+
+
+    </script>
+}
+

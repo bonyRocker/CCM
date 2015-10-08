@@ -1,0 +1,248 @@
+﻿@model CardChequeModule.Models.OCCUSER
+
+@{
+    ViewBag.Title = "UserCreation";
+}
+
+@*@using (Html.BeginForm(null, null, FormMethod.Post, new { @class = "form-horizontal", id = "userCreationForm" }))*@
+@using (Ajax.BeginForm("UserCreation", "Home",
+    new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { area = "Admin", id = "userCreationForm", @class = "form-horizontal" }))
+{
+    @*
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true)*@
+  
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-user"> User Creation Form</span></h3>
+        </div>
+        <div class="panel-body">
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.EMPLOYEEID, new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(x => x.EMPLOYEEID, new { @class = "form-control" })
+                    @*, disabled = "disabled"*@
+                </div>
+                @Html.Label("Date", new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    <div class='input-group date' id='datetimepicker1'>
+
+                        @Html.TextBoxFor(x => x.CREATEDON, new { @class = "form-control", @placeholder = "MM-DD-YYYY" })
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <img src="~/assets/img/spinner.gif" style="display: none" id="spinner"/>
+            <div class="form-group">
+                @Html.LabelFor(model => model.USERNAME, new {@class = "col-sm-1 control-label"})
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(x=>x.USERNAME, new {@class = "form-control"})
+
+                </div>
+                @Html.LabelFor(model => model.BRANCH, new {@class = "col-sm-1 control-label"})
+                <div class="col-sm-5">
+                    @Html.DropDownList("BRANCH",null,"Select Branch", new {@class = "form-control"})
+                    @Html.Hidden("BranchId")
+                </div>
+            </div>
+
+            <div class="form-group">
+
+                @Html.LabelFor(model => model.TYPE, new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    @Html.DropDownList("TYPE",null,"Select Role", new { @class = "form-control" })
+
+                </div>
+
+                @*@Html.LabelFor(model => model.ISACTIVE, new { @class = "col-lg-1 control-label" })
+                <div class="col-lg-5" id="checkerror">
+                    <input type="checkbox" id="isactive" name="isactive" style="margin-top: 10px; margin-left: 5px" />*@                    
+                    @*@Html.CheckBoxFor(x => (bool)x.ISACTIVE)*@
+
+                @*</div>*@
+                
+               
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-12 text-right">
+                    <button class="btn btn-info" type="submit" id="saveButton">Save</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+}
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody">
+
+            </div>
+            <div class="modal-footer">
+                @Html.ActionLink("Ok", "UserList", "Home", new { area = "Admin" }, new { @class = "btn btn-primary" })
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal2" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody2">
+
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/Scripts/jquery.validate.js"></script>
+    <script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        $('#saveButton').prop('disabled', true);
+        $("#userCreationForm").validate({
+            rules: {
+
+                EMPLOYEEID: {
+                    required: true,
+
+                },
+                CREATEDON: {
+                    required: true,
+
+                },
+                USERNAME: {
+                    required: true,
+
+                },
+                BRANCH: {
+                    required: true,
+
+                },
+                TYPE: {
+                    required: true,
+
+                },
+                //isactive: {
+                //    required: true,
+
+                //},
+
+
+            },
+
+            errorPlacement: function (error, element) {
+                if (element.attr("type") == "checkbox") {
+                    error.insertAfter("#checkerror").css({ marginLeft: "120px" });
+
+                } else {
+                    error.insertAfter(element);
+                }
+
+            },
+
+        });
+
+
+        $('#EMPLOYEEID').blur(function () {
+
+            $.ajax({
+                url: '@Url.Action("UserInfoByEmpId", "Home", new { area = "Admin" })',                
+                type: 'GET',
+                data: { empId: $(this).val() },
+                beforeSend: function () { $('#spinner').show(); },
+                complete: function () { $('#spinner').hide(); },
+                success: function (result) {
+                    if (result.flag == 0) {
+                        $('#BRANCH').val(result.branchId);
+                        $("#BRANCH").prop("disabled", true);
+                        $('#USERNAME').val(result.userName);
+                        $("#BranchId").val(result.branchId);
+                        $('#saveButton').prop('disabled', false);
+
+                    }
+                    else if (result.flag == 1) {
+                        $('#myModalBody2').html("Invalid employee Id");
+                        $('#myModal2').modal('show');
+                        $('#saveButton').prop('disabled', true);
+                    }
+                    else if (result.flag == 2) {
+                        $('#myModalBody2').html(result.msg);
+                        $('#myModal2').modal('show');
+                        $('#saveButton').prop('disabled', true);
+                    }
+                    else {
+                        $("#BRANCH").prop("disabled", false);
+                        $('#USERNAME').text('');
+                        var value = $("#BRANCH").val();
+                        $("#BranchId").val(value);
+                        $('#myModalBody2').html("No Employee Found");
+                        $('#myModal2').modal('show');
+                        $('#saveButton').prop('disabled', true);
+                    }
+                },
+                error: function (xhr) {
+                    $('#myModalBody2').html("Error");
+                    $('#myModal2').modal('sbow');
+                    $('#saveButton').prop('disabled', true);
+                }
+            });
+        });
+
+        function OnSuccess(response) {
+            $('#myModalBody').html(response);
+            $('#myModal').modal('show');
+            @*window.location.href ='@Url.Action("UserList", "Home", new { area = "Admin" })';*@
+        }
+        function OnFailure(response) {
+            $('#myModalBody2').html("Error");
+            $('#myModal2').modal('sbow');
+
+        }
+    </script>
+}
+
+
+
+@section DatetimeCss{
+
+    <link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+}
+@section DateTimeJs{
+
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('#datetimepicker1').datetimepicker({
+                format: 'MM/DD/YYYY'
+            });
+          
+        });
+
+
+    </script>
+}
+

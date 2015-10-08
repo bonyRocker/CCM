@@ -1,0 +1,319 @@
+﻿@model CardChequeModule.Models.CARDCHEREUISITION
+
+@{
+    ViewBag.Title = "Create";
+}
+
+
+@using (Ajax.BeginForm("Form", "Home", 
+    new AjaxOptions { OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, new { @class = "form-horizontal", id = "chequeReqForm", area = "ChequeRequisition" }))
+{
+    @*@Html.AntiForgeryToken()
+
+    @Html.ValidationSummary(true)*@
+    @Html.TextBoxFor(model => model.ID, new { @class = "form-control col-sm-10", @type = "hidden" })
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"><span class="glyphicon glyphicon-envelope"> <strong>Requisition Form</strong></span></h3>
+        </div>
+        <div class="panel-body">
+            <div class="form-group">
+                <div class="col-sm-6">
+                    @Html.LabelFor(model => model.CARDNO)
+                    @Html.TextBoxFor(model => model.CARDNO, new { @class = "form-control", @placeholder = "Please enter card number and press TAB" })
+                    <label style="display: none">Email</label>
+
+                </div>
+
+
+                @Html.LabelFor(model => model.CREATEDON, "Date", new { @class = "col-sm-1" })
+                <div class="col-sm-6">
+                    <div class='input-group date' id='datetimepicker1'>
+
+                        @Html.TextBoxFor(x => x.CREATEDON, new { @class = "form-control", @placeholder = "MM/DD/YYYY" })
+                        <span class="input-group-addon">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+                    </div>
+                </div>
+                @*<div class="col-sm-6">
+                    <div class='input-group date' id='datetimepicker1'>
+                        <input type='text' class="form-control" placeholder="MM/DD/YYYY" id="CREATEDON" name="CREATEDON" />
+
+                        <span class="input-group-addon" id="mySpan">
+                            <span class="glyphicon glyphicon-calendar"></span>
+                        </span>
+
+                    </div>
+                    @Html.ValidationMessageFor(m => m.CREATEDON)
+                </div>*@
+            </div>
+            <div id="result"></div>
+            <img id="spinner" src="~/assets/img/spinner.gif" style="display: none;">
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.BRANCHCODE, "Branch", new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    @Html.DropDownList("BRANCHCODE", null, "Select Branch", new { @class = "form-control" })
+                    @*@Html.HiddenFor(x => x.BRANCHCODE)*@
+                </div>
+                @Html.LabelFor(model => model.STATUS, new { @class = "col-sm-1 control-label" })
+                <div class="col-sm-5">
+                    @Html.DropDownList("STATUSID", null, "Select Status", new { @class = "form-control", @placeholder = "Status", disabled = "disabled" })
+                      @*@Html.HiddenFor(x => x.STATUS)*@
+                    <input type="hidden" name="STATUS" id="STATUS" value="@ViewBag.STATUS" />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                @Html.LabelFor(model => model.REFERENCENO, new { @class = "col-sm-1 control-label" })
+
+                <div class="col-sm-5">
+                    @Html.TextBoxFor(model => model.REFERENCENO, new { @class = "form-control", @placeholder = "Optional"})
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-12">
+                    @Html.LabelFor(model => model.REMARKS)
+                    @Html.TextAreaFor(model => model.REMARKS, new { @class = "form-control", @placeholder = "Optional" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="col-sm-11 control-label"></label>
+                <div class="col-sm-1">
+                    @if (Model.ID==0)
+                    {
+                        <button class="btn btn-info" type="submit" id="saveButton">Apply</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-success" type="submit">Edit</button> 
+                    } 
+                   
+                    
+                    
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+}
+
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Card Cheque Management</h4>
+            </div>
+            <div class="modal-body" id="modalBody">
+               
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Valid Card</h4>
+            </div>
+            <div class="modal-body" id="myModalBody2">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal1" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody1">
+
+            </div>
+            <div class="modal-footer">
+                @Html.ActionLink("Ok", "Index", "Home", new { area = "ChequeRequisition" }, new { @class = "btn btn-primary" })
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModal3" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Messege</h4>
+            </div>
+            <div class="modal-body" id="myModalBody3">
+
+            </div>
+            <div class="modal-footer">
+                @Html.ActionLink("Ok", "Index", "Requisition", new { area = "Admin" }, new { @class = "btn btn-primary" })
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.validate.js"></script>
+<script src="~/Scripts/jquery.validate.unobtrusive.js"></script>
+<script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        $('#saveButton').prop('disabled', true);
+        $("#CARDNO").blur(function () {
+
+
+            $.ajax({
+                url: '@Url.Action("GetCardDetails", "Home", new { area = "ChequeRequisition" })',                
+                type: 'POST',
+                data: { cardNo: $(this).val() },
+                beforeSend: function () { $('#spinner').show(); },
+                complete: function () { $('#spinner').hide(); },
+                success: function (result) {
+                    if (result.flag == 1) {
+                        $('#saveButton').prop('disabled', false);
+                        var msg = result.userName + "<br/>" + result.userDob;
+                        $('#myModalBody2').html(msg);
+                        $('#myModal2').modal('show');
+
+                    }
+                    else if(result.flag==0){
+                        $('#saveButton').prop('disabled', true);
+                        $('#modalBody').html('<strong>'+result.msg+'</strong>');
+                        $('#myModal').modal('show');
+                    }
+                    else if (result.flag == 2) {
+                        $('#saveButton').prop('disabled', true);
+                        $('#modalBody').html('<strong>' + result.msg + '</strong>');
+                        $('#myModal').modal('show');
+                    }
+                    else {
+                        $('#saveButton').prop('disabled', true);
+                        $('#modalBody').html('<strong>Error</strong>');
+                        $('#myModal').modal('show');
+                    }
+                    
+                },
+                error: function (xhr) {
+                    $('#saveButton').prop('disabled', true);
+                    $('#modalBody').html(xhr);
+                    $('#myModal').modal('show');
+                }
+            });
+
+
+        });
+
+        $("#chequeReqForm").validate({
+            rules: {
+
+                CREATEDON: {
+                    required: true,
+
+                },
+                BRANCHCODE: {
+                    required: true,
+
+                },
+                CARDNO: {
+                    required: true,
+                    digits: true,
+                    maxlength: 18,
+
+                },
+
+
+
+            },
+            messages:
+            {
+
+                CARDNO: {
+                    required: "Enter Card Number",
+
+                },
+                CREATEDON: {
+                    required: "Enter Date",
+
+                },
+
+            },
+            //errorPlacement: function (error, element) {
+            //    if (element.attr("type") == "radio") {
+            //        error.insertAfter("#radioError").css({ marginLeft: "200px" });
+
+            //    } else {
+            //        error.insertAfter(element);
+            //    }
+
+            //},
+
+        });
+        
+        function OnSuccess(response) {
+            //alert(response);
+            if (response.adminFlag == 1) {
+                $('#myModalBody3').html(response.msg);
+                $('#myModal3').modal('show');
+            } else {
+                $('#myModalBody1').html(response.msg);
+                $('#myModal1').modal('show');
+            }
+           
+            //window.location.href = '/ChequeRequisition/Home/Index/';
+        }
+        function OnFailure(response) {
+            
+            $('#modalBody').html(response);
+            $('#myModal').modal('show');
+        }
+
+    </script>
+}
+
+@section DatetimeCss{
+
+    <link href="~/Content/bootstrap-datetimepicker.min.css" rel="stylesheet" />
+
+}
+@section DateTimeJs{
+
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $('#datetimepicker1').datetimepicker({
+                format: 'MM/DD/YYYY'
+            });
+            //$('#datetimepicker2').datetimepicker({
+            //    format: 'MM/DD/YYYY'
+            //});
+        });
+
+
+    </script>
+}
+
